@@ -1,40 +1,71 @@
-import { ArrowUp, ArrowDown, RefreshCw, MoreHorizontal } from "lucide-react"
+'use client'
+
+import { ArrowDownToLine, ArrowUpFromLine, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import Image from "next/image"
+import { useProviderInfo } from "@/lib/api/hooks"
+import { formatCurrency, formatPercentage } from "@/lib/utils/format"
+import Link from "next/link"
 
 export function BalanceCard() {
+  const { data: providerInfo, isLoading } = useProviderInfo()
+
+  console.log('💳 [BalanceCard] Provider info:', providerInfo);
+  console.log('💳 [BalanceCard] Loading state:', isLoading);
+
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-12 bg-gray-200 rounded w-2/3"></div>
+          <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </Card>
+    )
+  }
+
   return (
     <Card className="p-6">
       <div className="mb-6">
         <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden">
-            <Image src="/us-flag.jpg" alt="US Flag" width={32} height={32} className="object-cover" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-blue-600 text-white font-bold text-sm">
+            $
           </div>
-          <span className="text-sm text-muted-foreground">Total balances</span>
+          <span className="text-sm text-muted-foreground">Available Balance</span>
         </div>
-        <div className="mb-2 text-4xl font-bold">3,908 USD</div>
-        <div className="text-sm text-muted-foreground">
-          1 USD = 15,326.35 IDR <span className="text-xs">As of today</span>
+        <div className="mb-2 text-4xl font-bold">
+          {formatCurrency(providerInfo?.currentBalance || 0)}
+        </div>
+        <div className="text-sm text-muted-foreground flex items-center gap-2">
+          <span>Network:</span>
+          <span className="font-semibold text-purple-600 uppercase">
+            {providerInfo?.chain || 'BASE'}
+          </span>
+          <span className="mx-2">•</span>
+          <span>{providerInfo?.token || 'USDC'}</span>
         </div>
       </div>
 
       <div className="flex gap-3">
-        <Button className="flex-1 bg-foreground text-background hover:bg-foreground/90">
-          <ArrowUp className="mr-2 h-4 w-4" />
-          Send
-        </Button>
-        <Button className="flex-1 bg-foreground text-background hover:bg-foreground/90">
-          <ArrowDown className="mr-2 h-4 w-4" />
-          Request
-        </Button>
-        <Button className="flex-1 bg-foreground text-background hover:bg-foreground/90">
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Convert
-        </Button>
-        <Button variant="outline" size="icon">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <Link href="/dashboard/deposit" className="flex-1">
+          <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+            <ArrowDownToLine className="mr-2 h-4 w-4" />
+            Deposit
+          </Button>
+        </Link>
+        <Link href="/dashboard/withdraw" className="flex-1">
+          <Button className="w-full" variant="outline">
+            <ArrowUpFromLine className="mr-2 h-4 w-4" />
+            Withdraw
+          </Button>
+        </Link>
+        <Link href="/dashboard/history" className="flex-1">
+          <Button className="w-full" variant="outline">
+            <TrendingUp className="mr-2 h-4 w-4" />
+            History
+          </Button>
+        </Link>
       </div>
     </Card>
   )
